@@ -1,0 +1,70 @@
+■1.1.1
+最初の Keras のコード
+
+```python:first_keras.py
+from keras.models import Sequential
+model = Sequential()
+model.add(Dense(12, input_dim=8, kernel_initializer='random_uniform'))
+```
+
+ここでいきなりエラーが出た・・・
+
+```python
+Traceback (most recent call last):
+  File "first_keras.py", line 5, in <module>
+    model.add(Dense(12, input_dim=8, kernel_initializer='random_uniform'))
+NameError: name 'Dense' is not defined
+```
+
+---
+
+どうやらDenseが定義されていないようなのでインポートします
+
+```python
+from keras.models import Sequential
+from keras.layers import Dense
+model = Sequential()
+model.add(Dense(12, input_dim=8, kernel_initializer='random_uniform'))
+```
+
+これでモデルの定義まで完了
+
+
+
+■コード実行時の警告
+・コード実行時に以下の警告が出ていた
+(base) C:\Users\lock__000\Documents\GitHub\DeepLearningWithKeras\ch01>python SimpleNet.py
+C:\Users\lock__000\Anaconda3\lib\site-packages\h5py\__init__.py:36: FutureWarning: Conversion of the second argument of issubdtype from `float` to `np.floating` is deprecated. In future, it will be treated as `np.float64 == np.dtype(float).type`.
+  from ._conv import register_converters as _register_converters
+
+h5pyパッケージがNumpyを使っている部分で警告を出しているとのこと
+
+試しに以下を実行してみると・・・
+>>> import h5py as h5
+C:\Users\lock__000\Anaconda3\lib\site-packages\h5py\__init__.py:36: FutureWarning: Conversion of the second argument of issubdtype from `float` to `np.floating` is deprecated. In future, it will be treated as `np.float64 == np.dtype(float).type`.
+  from ._conv import register_converters as _register_converters
+となり、警告が出力された
+
+h5pyのバージョンを上げることで対応できるとのこと。
+まずはh5pyのバージョンを確認
+>>> print(h5.__version__)
+2.7.1
+
+バージョンを上げる
+>pip install -U h5py
+
+特定のバージョンに上げたい場合は以下、
+>pip install h5py==2.8.0rc1
+
+<参考>
+https://qiita.com/cygmin/items/b2c72eb3a9c305ff1419
+
+
+■ネットワーク（モデル）のコンパイルができない
+Sequentialモデルをコンパイルする行で以下のエラーが出た
+    model.complie(loss='categorical_crossentropy', optimizer=OPTIMIZER, metrics=['accuracy'])
+AttributeError: 'Sequential' object has no attribute 'complie'
+
+
+
+
