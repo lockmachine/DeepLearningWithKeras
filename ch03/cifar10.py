@@ -50,3 +50,44 @@ class CIFAR10Dataset():
             data = data.reshape(shape)
             
         return data
+
+class Trainer():
+    def __init__(self, model, loss, optimizer):
+        self._target = model
+        self._target.compile(loss=loss, optimizer=optimizer, metrics=['accuracy'])
+        self.verbose = 1
+        self.log_dir = os.path.join(os.path.dirname(__file__), 'logdir')
+        self.model_file_name = 'model_file.hdf5'
+        
+    def train(self, x_train, y_train, batch_size, epochs, validation_split):
+        if os.path.exists(self.log_dir):
+            import shutil
+            shutil.rmtree(self.log_dir) # remove previous execution
+        os.mkdir(self.log_dir)
+        
+        self._target.fit(
+            x_train, y_train,
+            batch_size=batch_size, epochs=epochs,
+            validation_split=validation_split,
+            callbacks=[
+                TensorBoard(log_dir=self.log_dir),
+                ModelCheckpoint(os.path.join(self.log_dir, self.model_file_name),
+                save_best_only=True)
+            ],
+            verbose=self.verbose
+        )
+
+dataset = CIFAR10Dataset()
+
+# make model
+model = network(dataset.image_shape, dataset.num_classes)
+
+# train the model
+x_train, y_train, x_test, y_test = dataset.get_batch()
+trainer = Trainer(model, loss='categorical_crossentropy', optimizer='RMSprop')
+trainer.train(x_train, y_train, batch_size=128, epochs=12, validation_split=0.2)
+
+# show result
+score = model.evaluate(x_test, y_test, verbose=0)
+print('Test loss:', score[0])
+print('Test accuracy:', score[1])
